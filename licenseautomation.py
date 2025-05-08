@@ -17,27 +17,32 @@ commission_no = main_info_sheet['B3'].value
 system_list_workbook = openpyxl.load_workbook(system_list_file_path)
 system_list_sheet = system_list_workbook['Übersicht der Systeme']
 
-# Find the next empty row in the "Comision Number" column
-comision_column = system_list_sheet['B']
-next_empty_row = len(comision_column) + 1
-
-# Write the Commission No. to the next empty row in the "Comision Number" column
-system_list_sheet[f'B{next_empty_row}'] = commission_no
-
-# === NUEVA LÓGICA CON HOJA 'Systemmatrix' ===
-# Imprimir todos los valores desde G4 hasta el final de la fila 4 en Systemmatrix
+# === NEW LOGIC WITH 'Systemmatrix' SHEET ===
+# Extract all values from G4 onwards in Systemmatrix
 start_col_index = column_index_from_string('G')  # G = 7
 row_index = 4
 
-print("Valores encontrados en la hoja 'Systemmatrix', fila 4 desde la columna G en adelante:")
-
+# Collect the SAP positions from row 4, starting from column G
+sap_positions = []
 for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
     cell = systemmatrix_sheet.cell(row=row_index, column=col)
     value = cell.value
-    print(f"- {value}")
+    if value:  # Only add non-empty values
+        sap_positions.append(value)
 
-# Guardar cambios en el archivo de destino
+# Write the 'commission number' in column B and 'sap positions' in column C
+# Find the next empty row in column B of 'Übersicht der Systeme'
+b_column = system_list_sheet['B']
+next_empty_row_b = len(b_column) + 1
+
+# Write the 'commission number' and 'sap position' in the corresponding rows
+for sap_position in sap_positions:
+    system_list_sheet[f'B{next_empty_row_b}'] = commission_no  # Write Commission No. in column B
+    system_list_sheet[f'C{next_empty_row_b}'] = sap_position   # Write SAP Position in column C
+    next_empty_row_b += 1
+
+# Save changes to the destination file
 system_list_workbook.save(system_list_file_path)
 
-# Confirmación final
-print(f"\nCommission No. {commission_no} has been appended to the 'System List Example.xlsx' file.")
+# Final confirmation
+print(f"\nThe Commission No. has been added to column B and the SAP Position to column C of 'System List Example.xlsx'.")
