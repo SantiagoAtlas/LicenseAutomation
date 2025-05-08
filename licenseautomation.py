@@ -10,8 +10,9 @@ checklist_workbook = openpyxl.load_workbook(checklist_file_path, keep_vba=True)
 main_info_sheet = checklist_workbook['Main Info']
 systemmatrix_sheet = checklist_workbook['Systemmatrix']
 
-# Extract the Commission No. from 'Main Info'
+# Extract the Commission No. and End Customer from 'Main Info'
 commission_no = main_info_sheet['B3'].value
+end_customer = main_info_sheet['B7'].value
 
 # Load the system list Excel file
 system_list_workbook = openpyxl.load_workbook(system_list_file_path)
@@ -46,10 +47,11 @@ for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
     if has_x:
         system_list_sheet[f'B{next_empty_row_b}'] = commission_no  # Column B
         system_list_sheet[f'C{next_empty_row_b}'] = sap_position   # Column C
+        system_list_sheet[f'E{next_empty_row_b}'] = end_customer   # Column E
         next_empty_row_b += 1
 
 # Save changes
 system_list_workbook.save(system_list_file_path)
 
 # Final confirmation
-print("\nOnly SAP positions with at least one 'x' were copied to the system list.")
+print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer.")
