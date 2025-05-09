@@ -10,9 +10,12 @@ checklist_workbook = openpyxl.load_workbook(checklist_file_path, keep_vba=True)
 main_info_sheet = checklist_workbook['Main Info']
 systemmatrix_sheet = checklist_workbook['Systemmatrix']
 
-# Extract the Commission No. and End Customer from 'Main Info'
+# Extract the Commission No., End Customer, Location, Project Name, and System from 'Main Info'
 commission_no = main_info_sheet['B3'].value
 end_customer = main_info_sheet['B7'].value
+location = main_info_sheet['B8'].value
+project_name = main_info_sheet['B5'].value
+system = main_info_sheet['B11'].value
 
 # Load the system list Excel file
 system_list_workbook = openpyxl.load_workbook(system_list_file_path)
@@ -54,10 +57,13 @@ for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
         system_list_sheet[f'C{next_empty_row_b}'] = sap_position   # Column C
         system_list_sheet[f'D{next_empty_row_b}'] = combined_value # Column D
         system_list_sheet[f'E{next_empty_row_b}'] = end_customer   # Column E
+        system_list_sheet[f'H{next_empty_row_b}'] = location       # Column H
+        system_list_sheet[f'I{next_empty_row_b}'] = project_name   # Column I
+        system_list_sheet[f'J{next_empty_row_b}'] = system         # Column J
         next_empty_row_b += 1
 
 # Save changes
 system_list_workbook.save(system_list_file_path)
 
 # Final confirmation
-print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, and Order Article Number.")
+print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, Order Article Number, Location, Project Name, and System.")
