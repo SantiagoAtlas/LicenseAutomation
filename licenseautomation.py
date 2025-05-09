@@ -2,10 +2,30 @@ import openpyxl
 from openpyxl.utils import column_index_from_string
 from openpyxl.styles import Border, Side, Alignment
 from openpyxl.worksheet.datavalidation import DataValidation
+import pdfplumber
 
 # Paths to the Excel files
 checklist_file_path = 'C:\\Data\\LicenseAutomation\\System_Checklist_Example.xlsm'
 system_list_file_path = 'C:\\Data\\LicenseAutomation\\System_List_Example.xlsx'
+pdf_file_path = 'C:\\Data\\LicenseAutomation\\Prüfprotokoll.pdf'
+
+# Function to extract the specific version from PDF
+def extract_specific_version(pdf_path, version_name):
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            tables = page.extract_tables()
+            for table in tables:
+                for row in table:
+                    if version_name in row[0]:
+                        return row[1]
+    return None
+
+# Extract the specific version from PDF
+version_name = 'V3 – Board Firmware'
+specific_version = extract_specific_version(pdf_file_path, version_name)
+
+# Print the specific version for double-check
+print(f"Extracted Version for {version_name}: {specific_version}")
 
 # Load the checklist Excel file
 checklist_workbook = openpyxl.load_workbook(checklist_file_path, keep_vba=True)
@@ -66,13 +86,13 @@ for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
         system_list_sheet[f'H{next_empty_row_b}'] = location       # Column H
         system_list_sheet[f'I{next_empty_row_b}'] = project_name   # Column I
         system_list_sheet[f'J{next_empty_row_b}'] = system         # Column J
+        system_list_sheet[f'K{next_empty_row_b}'] = specific_version  # Column K
 
         # Apply border and alignment to the relevant cells
-        for col_letter in ['B', 'C', 'D', 'E', 'H', 'I', 'J']:
+        for col_letter in ['B', 'C', 'D', 'E', 'H', 'I', 'J', 'K']:
             cell = system_list_sheet[f'{col_letter}{next_empty_row_b}']
             cell.border = thin_border
             cell.alignment = right_alignment
-
         next_empty_row_b += 1
 
 # Add data validation for column L
@@ -87,7 +107,8 @@ for row in range(2, next_empty_row_b):  # Assuming the first row is a header
     cell.alignment = right_alignment  # Apply right alignment to column L cells
 
 # Save changes
-system_list_workbook.save(system_list_file_path)
-
-# Final confirmation
-print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, Order Article Number, Location, Project Name, and System. Data validation added to column L with borders and right alignment applied.")
+try:
+    system_list_workbook.save(system_list_file_path)
+    print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, Order Article Number, Location, Project Name, System, and Version. Data validation added to column L with borders and right alignment applied.")
+except PermissionError:
+    print("Permission denied: Unable to save the file. Please ensure the file is not open and you have write permissions.")
