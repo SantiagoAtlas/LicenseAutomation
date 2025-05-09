@@ -37,16 +37,22 @@ for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
 
     # Check if there's any 'x' (case-insensitive) below this column
     has_x = False
+    item_name = None
+    order_article_number = None
     for row in range(first_data_row, systemmatrix_sheet.max_row + 1):
         cell_value = systemmatrix_sheet.cell(row=row, column=col).value
         if isinstance(cell_value, str) and cell_value.strip().lower() == 'x':
             has_x = True
+            item_name = systemmatrix_sheet.cell(row=row, column=2).value  # Assuming item name is in column B (2)
+            order_article_number = systemmatrix_sheet.cell(row=row, column=3).value  # Assuming order article number is in column C (3)
             break
 
     # If there's at least one 'x', write to the target sheet
     if has_x:
+        combined_value = f"{item_name} / {order_article_number}" if item_name and order_article_number else item_name or order_article_number
         system_list_sheet[f'B{next_empty_row_b}'] = commission_no  # Column B
         system_list_sheet[f'C{next_empty_row_b}'] = sap_position   # Column C
+        system_list_sheet[f'D{next_empty_row_b}'] = combined_value # Column D
         system_list_sheet[f'E{next_empty_row_b}'] = end_customer   # Column E
         next_empty_row_b += 1
 
@@ -54,4 +60,4 @@ for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
 system_list_workbook.save(system_list_file_path)
 
 # Final confirmation
-print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer.")
+print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, and Order Article Number.")
