@@ -1,5 +1,7 @@
 import openpyxl
 from openpyxl.utils import column_index_from_string
+from openpyxl.styles import Border, Side, Alignment
+from openpyxl.worksheet.datavalidation import DataValidation
 
 # Paths to the Excel files
 checklist_file_path = 'C:\\Data\\LicenseAutomation\\System_Checklist_Example.xlsm'
@@ -29,6 +31,10 @@ first_data_row = 5  # First row below SAP header to check for 'x'
 # Find the next empty row in column B
 b_column = system_list_sheet['B']
 next_empty_row_b = len(b_column) + 1
+
+# Define border and alignment styles
+thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+right_alignment = Alignment(horizontal='right')
 
 # Loop through columns G to the last used column
 for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
@@ -60,10 +66,28 @@ for col in range(start_col_index, systemmatrix_sheet.max_column + 1):
         system_list_sheet[f'H{next_empty_row_b}'] = location       # Column H
         system_list_sheet[f'I{next_empty_row_b}'] = project_name   # Column I
         system_list_sheet[f'J{next_empty_row_b}'] = system         # Column J
+
+        # Apply border and alignment to the relevant cells
+        for col_letter in ['B', 'C', 'D', 'E', 'H', 'I', 'J']:
+            cell = system_list_sheet[f'{col_letter}{next_empty_row_b}']
+            cell.border = thin_border
+            cell.alignment = right_alignment
+
         next_empty_row_b += 1
+
+# Add data validation for column L
+data_validation = DataValidation(type="list", formula1='"MQTT,OPC UA,IBM MQ"', showDropDown=True)
+system_list_sheet.add_data_validation(data_validation)
+
+# Apply data validation to the relevant cells in column L
+for row in range(2, next_empty_row_b):  # Assuming the first row is a header
+    cell = system_list_sheet[f'L{row}']
+    data_validation.add(cell)
+    cell.border = thin_border  # Apply border to column L cells
+    cell.alignment = right_alignment  # Apply right alignment to column L cells
 
 # Save changes
 system_list_workbook.save(system_list_file_path)
 
 # Final confirmation
-print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, Order Article Number, Location, Project Name, and System.")
+print("\nOnly SAP positions with at least one 'x' were copied to the system list, including End Customer, Item Name, Order Article Number, Location, Project Name, and System. Data validation added to column L with borders and right alignment applied.")
