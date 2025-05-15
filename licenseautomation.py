@@ -62,7 +62,7 @@ print(f"   🔹 System: {system}")
 print(f"   🔹 Steuerung: {steuerung}")
 
 # Select PDF and keywords based on System
-if system == 'SYS6000':
+if system == 'SYS6000 V4':
     selected_pdf = pdf_sys_path
     keywords = [
         'V3 – Board Linux Version',
